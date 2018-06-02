@@ -7,6 +7,7 @@ import copy
 import json
 import uuid
 import pymp
+import os
 
 from src.utils import append_variable_to_url, download_img_from_url
 
@@ -16,7 +17,8 @@ class DuProprioScraper:
     def __init__(self,
                  base_page="https://duproprio.com/en/search/list",
                  base_image_url="https://photos.duproprio.com/",
-                 default_img_save_path="data/img/"):
+                 default_img_save_path="data/img/",
+                 default_data_path="data/processed/"):
         self.base_page = base_page
         self.base_search_var = {"sort": "-published_at",
                                 "search": "true",
@@ -25,14 +27,17 @@ class DuProprioScraper:
                                 "parent": "1",
                                 "pageNumber": 1}
         self.base_image_url = base_image_url
-        self.default_img_save_path = "data/img/"
+        self.default_img_save_path = default_img_save_path
+        self.data_path = default_data_path
+
+        self.cache_urls, self.addr_faulty_urls, self.map_url_uuid = self._cache()
+        print("Caching completed")
 
     def create_url_for_search_page(self):
         variables = copy.deepcopy(self.base_search_var)
         variables["pageNumber"] = str(variables["pageNumber"])
 
-        variables_string = append_variable_to_url(variables)
-        url = self.base_page + variables_string
+        url = append_variable_to_url(self.base_page, variables)
 
         self.base_search_var["pageNumber"] += 1
 
@@ -176,11 +181,10 @@ class DuProprioScraper:
             addr_tag = soup_building_page.find('div', class_="listing-location__group-address")
             address = dict()
 
-            for addr_prop in addr_tag.contents:
-                if type(addr_prop) is Tag and addr_prop.name == "meta":
-                    address[addr_prop.attrs["property"]] = addr_prop.attrs["content"]
+            for addr_prop in addr_tag.find_all("meta"):
+                address[addr_prop.attrs["property"]] = addr_prop.attrs["content"]
 
-            return address
+            return {"addr": address}
 
         def download_images(soup, save_path):
             # TODO Should valide it's always position 30 in findings to avoid computation
@@ -280,17 +284,59 @@ class DuProprioScraper:
 
                 with pymp.Parallel(thread) as p:
                     for url in p.iterate(urls):
-                        try:
-                            self.parse_building_page(url)
-                            p.print(url)
-                        except Exception as e:
-                            print(e)
+                        if (url not in self.cache_urls) and (url not in self.addr_faulty_urls):
+                            try:
+                                self.parse_building_page(url)
+                                message = "New url: " + url
+                                p.print(message)
+                            except Exception as e:
+                                print(e)
+                        elif url in self.addr_faulty_urls:
+                            try:
+                                self.parse_building_page(url)
+                                message = "Update addr: " + url
+                                p.print(message)
+                            except Exception as e:
+                                print(e)
+                        else:
+                            message = "Already cached: " + url
+                            p.print(message)
 
             except Exception as e:
                 print(e)
 
+    def _cache(self, ):
+        urls = set()
+        # Temp cache
+        faulty_addr_url = set()
+        map_url_uuid = dict()
+
+        for file_path in os.listdir(self.data_path):
+            with open(self.data_path + file_path, "r") as f:
+                building_data = json.load(f)
+
+                urls.add(building_data["url"])
+
+                if building_data.get("addressCountry") is not None:
+                    faulty_addr_url.add(building_data["url"])
+
+                map_url_uuid[building_data["url"]] = building_data["page_id"]
+
+        return urls, faulty_addr_url, map_url_uuid
+
     def get_satellite_view_for_building(self):
         # TODO implement
+        pass
+
+
+class DuProprioBuilding:
+    def __init__(self, path_json):
+        self.path_json = path_json
+        with open(self.path_json, "r") as f:
+            self.data = json.load(f)
+
+    def get_url_escaped_addr(self):
+        #addr =
         pass
 
 if __name__ == '__main__':
