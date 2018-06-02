@@ -8,7 +8,8 @@ import json
 import uuid
 import pymp
 
-from src.utils import try_catch_empty_dict
+from src.utils import append_variable_to_url, download_img_from_url
+
 
 class DuProprioScraper:
 
@@ -30,7 +31,7 @@ class DuProprioScraper:
         variables = copy.deepcopy(self.base_search_var)
         variables["pageNumber"] = str(variables["pageNumber"])
 
-        variables_string = DuProprioScraper.append_variable_to_url(variables)
+        variables_string = append_variable_to_url(variables)
         url = self.base_page + variables_string
 
         self.base_search_var["pageNumber"] += 1
@@ -51,23 +52,6 @@ class DuProprioScraper:
             building_pages.append(finding.attrs["href"])
 
         return building_pages
-
-    @staticmethod
-    def append_variable_to_url(var_dict):
-        '''
-        Proeprly formatted string to append variable to URL
-        :param var_dict:
-        :return: URL variables string
-        '''
-        var_string = ""
-
-        for key in var_dict:
-            if var_string == "":
-                var_string = var_string + "?" + key + "=" + var_dict[key]
-            else:
-                var_string = var_string + "&" + key + "=" + var_dict[key]
-
-        return var_string
 
     def parse_building_page(self, url):
         def parse_core_property_features(soup):
@@ -281,36 +265,33 @@ class DuProprioScraper:
         if save_path is None:
             save_path = self.default_img_save_path
 
-        try:
-            img_url = self.base_image_url + img_name
-            img_data = requests.get(img_url).content
+        img_url = self.base_image_url + img_name
+        img_path = save_path + img_name
 
-            img_path = save_path + img_name
-
-            with open(img_path, 'wb') as handler:
-                handler.write(img_data)
-        except FileNotFoundError:
-            pass
+        download_img_from_url(img_url, img_path)
 
         return
 
-    def process_page(self):
+    def process_page(self, thread=4):
         for i in range(2300):
             try:
                 search_url = self.create_url_for_search_page()
                 urls = self.find_building_page_in_search_page(search_url)
 
-                with pymp.Parallel(4) as p:
+                with pymp.Parallel(thread) as p:
                     for url in p.iterate(urls):
                         try:
                             self.parse_building_page(url)
                             p.print(url)
                         except Exception as e:
-                            pass
+                            print(e)
 
             except Exception as e:
-                pass
+                print(e)
 
+    def get_satellite_view_for_building(self):
+        # TODO implement
+        pass
 
 if __name__ == '__main__':
     parser = DuProprioScraper()
