@@ -8,6 +8,7 @@ import json
 import uuid
 import pymp
 
+from src.utils import try_catch_empty_dict
 
 class DuProprioScraper:
 
@@ -295,13 +296,20 @@ class DuProprioScraper:
 
     def process_page(self):
         for i in range(2300):
-            search_url = self.create_url_for_search_page()
-            urls = self.find_building_page_in_search_page(search_url)
+            try:
+                search_url = self.create_url_for_search_page()
+                urls = self.find_building_page_in_search_page(search_url)
 
-            with pymp.Parallel(4) as p:
-                for url in p.iterate(urls):
-                    self.parse_building_page(url)
-                    p.print(url)
+                with pymp.Parallel(4) as p:
+                    for url in p.iterate(urls):
+                        try:
+                            self.parse_building_page(url)
+                            p.print(url)
+                        except Exception as e:
+                            pass
+
+            except Exception as e:
+                pass
 
 
 if __name__ == '__main__':
