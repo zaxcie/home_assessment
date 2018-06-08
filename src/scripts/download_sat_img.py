@@ -1,0 +1,1 @@
+from src.data.duproprio import *
