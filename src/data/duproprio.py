@@ -258,6 +258,8 @@ class DuProprioScraper:
         with open("data/processed/" + str(page_id) + ".json", "w") as f:
             json.dump(page_metadata, f)
 
+            return page_metadata
+
     def download_images(self, img_name, save_path=None):
         '''
         Download an image from DuProprio.
@@ -286,22 +288,24 @@ class DuProprioScraper:
                     for url in p.iterate(urls):
                         if (url not in self.cache_urls) and (url not in self.addr_faulty_urls):
                             try:
-                                self.parse_building_page(url)
+                                page_metadata = self.parse_building_page(url)
                                 message = "New url: " + url
                                 p.print(message)
                             except Exception as e:
                                 print(e)
                         elif url in self.addr_faulty_urls:
                             try:
-                                self.parse_building_page(url)
+                                page_metadata = self.parse_building_page(url)
                                 message = "Update addr: " + url
                                 p.print(message)
                             except Exception as e:
                                 print(e)
                         else:
+                            page_metadata = None
                             message = "Already cached: " + url
                             p.print(message)
 
+                        return page_metadata
             except Exception as e:
                 print(e)
 
@@ -311,18 +315,21 @@ class DuProprioScraper:
         faulty_addr_url = set()
         map_url_uuid = dict()
 
-        for file_path in os.listdir(self.data_path):
-            with open(self.data_path + file_path, "r") as f:
-                building_data = json.load(f)
+        if os.listdir(self.data_path):  # Implicit bool
+            return [], [], []
+        else:
+            for file_path in os.listdir(self.data_path):
+                with open(self.data_path + file_path, "r") as f:
+                    building_data = json.load(f)
 
-                urls.add(building_data["url"])
+                    urls.add(building_data["url"])
 
-                if building_data.get("addressCountry") is not None:
-                    faulty_addr_url.add(building_data["url"])
+                    if building_data.get("addressCountry") is not None:
+                        faulty_addr_url.add(building_data["url"])
 
-                map_url_uuid[building_data["url"]] = building_data["page_id"]
+                    map_url_uuid[building_data["url"]] = building_data["page_id"]
 
-        return urls, faulty_addr_url, map_url_uuid
+            return urls, faulty_addr_url, map_url_uuid
 
     def get_satellite_view_for_building(self):
         # TODO implement
@@ -330,14 +337,26 @@ class DuProprioScraper:
 
 
 class DuProprioBuilding:
-    def __init__(self, path_json):
-        self.path_json = path_json
-        with open(self.path_json, "r") as f:
-            self.data = json.load(f)
+    def __init__(self, duproprio_metadata_dict):
+        self.meta_dict = duproprio_metadata_dict
+
+    @staticmethod
+    def format_url_escaped_addr(addr):
+        string_addr = addr["streetAddress"] + addr["addressLocality"] + addr["postalCode"]
+        escaped_string_addr = string_addr.replace(" ", "+")
+
+        return escaped_string_addr
 
     def get_url_escaped_addr(self):
-        #addr =
-        pass
+        return self.format_url_escaped_addr(self.meta_dict["addr"])
+
+    @staticmethod
+    def init_from_file(path):
+        with open(path, "r") as f:
+            meta_dict = json.load(f)
+
+        return DuProprioBuilding(meta_dict)
+
 
 if __name__ == '__main__':
     parser = DuProprioScraper()
