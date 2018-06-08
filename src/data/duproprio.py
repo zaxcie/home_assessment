@@ -293,6 +293,7 @@ class DuProprioScraper:
                                 p.print(message)
                             except Exception as e:
                                 print(e)
+                                page_metadata = None
                         elif url in self.addr_faulty_urls:
                             try:
                                 page_metadata = self.parse_building_page(url)
@@ -300,6 +301,7 @@ class DuProprioScraper:
                                 p.print(message)
                             except Exception as e:
                                 print(e)
+                                page_metadata = None
                         else:
                             page_metadata = None
                             message = "Already cached: " + url
@@ -330,10 +332,6 @@ class DuProprioScraper:
                     map_url_uuid[building_data["url"]] = building_data["page_id"]
 
             return urls, faulty_addr_url, map_url_uuid
-
-    def get_satellite_view_for_building(self):
-        # TODO implement
-        pass
 
 
 class DuProprioBuilding:
