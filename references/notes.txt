@@ -1,0 +1,14 @@
+Google maps info
+    https://gis.stackexchange.com/questions/7430/what-ratio-scales-do-google-maps-zoom-levels-correspond-to
+
+Deep learning model for sat imagery
+    https://github.com/azavea/raster-vision
+    UNet - https://github.com/zhixuhao/unet
+    https://www.tdcommons.org/cgi/viewcontent.cgi?article=1329&context=dpubs_series
+
+Deep learning image regression
+    https://github.com/udacity/self-driving-car/tree/master/steering-models/community-models
+    https://github.com/udacity/self-driving-car/tree/master/steering-models/community-models/autumn
+
+Sat imagery dataset
+    https://www.researchgate.net/post/Is_there_a_public_satellite_image_dataset_including_road_and_or_building_masks_labels_except_for_SpaceNet_TorontoCity_dataset
