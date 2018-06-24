@@ -55,6 +55,7 @@ class RasterSpaceNet:
 
     def _load_img_from_file(self, path):
         img = cv2.imread(path)
+        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
 
         return img
 
@@ -72,7 +73,6 @@ class RasterSpaceNet:
 
         return buildings
 
-
     def _load_geojson_from_file(self, path):
         with open(path, "r") as f:
             geo = json.load(f)
@@ -88,7 +88,7 @@ class RasterSpaceNet:
             for building_coord in self.pix_buildings_coords:
                 show_img = draw_polygone(show_img, building_coord)
 
-            plt.imshow(show_img)
+            plt.imshow(self.img)
             plt.show()
 
 
