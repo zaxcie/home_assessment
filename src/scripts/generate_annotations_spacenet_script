@@ -1,0 +1,7 @@
+python python/createDataSpaceNet.py /Users/kforest/workspace/home_assessment/data/spacenet/AOI_5_Khartoum_Train/ \
+           --srcImageryDirectory RGB-PanSharpen \
+           --outputDirectory /Users/kforest/workspace/home_assessment/data/spacenet/AOI_5_Khartoum_Train/annotations/ \
+           --annotationType PASCALVOC2012 \
+           --convertTo8Bit \
+           --outputFileType JPEG \
+           --imgSizePix 640

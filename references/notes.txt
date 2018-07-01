@@ -16,3 +16,6 @@ Sat imagery dataset
 #Note I use both OpenCV and SKImage, should migrate the repo to use only one. Probably SKImage. Easier to use
 
 # TODO pipeline to properly generate trainig data for segmentation net using SpaceNet dataset
+
+# Note Try to think about an image quality metric to choose if we use it to train
+# Note Validate no duplicate in image in val set
