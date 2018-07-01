@@ -12,3 +12,6 @@ scrapy
 pygm-pypi
 bs4
 requests
+torch
+Keras
+tensorflow

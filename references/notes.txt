@@ -12,3 +12,7 @@ Deep learning image regression
 
 Sat imagery dataset
     https://www.researchgate.net/post/Is_there_a_public_satellite_image_dataset_including_road_and_or_building_masks_labels_except_for_SpaceNet_TorontoCity_dataset
+
+#Note I use both OpenCV and SKImage, should migrate the repo to use only one. Probably SKImage. Easier to use
+
+# TODO pipeline to properly generate trainig data for segmentation net using SpaceNet dataset
