@@ -1,5 +1,5 @@
 from src.models.unet.network import get_unet
-from src.processing.images import train_segmentation_generator, saveResult
+from src.processing.sat_images import segmentation_generator
 from keras.callbacks import ModelCheckpoint, LearningRateScheduler
 
 
@@ -8,11 +8,11 @@ if __name__ == '__main__':
                          width_shift_range=0.05,
                          height_shift_range=0.05,
                          shear_range=0.05,
-                         zoom_range=0.05,  # Note Curious of the one
+                         zoom_range=0.05,  # Note Curious of the one for sat images
                          horizontal_flip=True,
                          fill_mode='nearest')
 
-    myGene = train_segmentation_generator(1, 'data/spacenet/rasters/', 'jpg', 'mask', data_gen_args, save_to_dir=None)
+    myGene = segmentation_generator(1, 'data/spacenet/rasters/', 'jpg', 'mask', data_gen_args, save_to_dir=None)
 
     model = get_unet()
     model_checkpoint = ModelCheckpoint('unet_membrane.hdf5', monitor='loss', verbose=1, save_best_only=True)
